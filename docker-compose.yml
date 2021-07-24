@@ -1,0 +1,16 @@
+version: "3.1"
+networks:
+  default:
+    external:
+      name: nodenet
+services: 
+    node-app:
+        build: .
+        volumes: 
+          - ./:/app
+          - /app/node_modules
+        ports: 
+            - "4000:4000"
+        environment: 
+            - PORT=4000
+        command: npm run start
