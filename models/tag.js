@@ -1,4 +1,4 @@
-const dbConfig = require('./db.config.js')
+const dbConfig = require('./db.config.js').dbConfig
 
 const Sequelize = require('sequelize') 
 
@@ -69,6 +69,8 @@ function seq_auth() {
     console.error('Unable to connect to the database:', err)
   })
 }
+
+// seq_auth()
 
 // export function getAll (req, res) {
 //   Tag.findAll().then(tags => {

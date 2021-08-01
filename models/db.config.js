@@ -1,8 +1,8 @@
 const dbConfig = {
-    host: 'ip',
-    user: 'user',
-    password: 'password',
-    database: 'database',
+    host: '167.71.69.121',
+    user: 'inkerinmaa',
+    password: 'Nyenskans_1611',
+    database: 'EVENTS',
     dialect: "mysql",
     pool: {
         max: 5,
@@ -12,4 +12,9 @@ const dbConfig = {
     }
 }
 
-module.exports = dbConfig
+const token = 'jEG_pvqQ9g7IvPfrkYkUqtFLtopB40TK2X7SWx4wNjn1Xzt05XC8BqxzdiNsruV275Tu_4qU9HBbvNh81NJIMQ=='
+
+module.exports = {
+    dbConfig: dbConfig,
+    token: token
+}

@@ -11,6 +11,9 @@ const { OPCUAClient,
 
 const publish = require("./mqtt/publish.js")
 const { seq_auth, updateTags } = require('./models/tag.js')
+const dbConfig = require("./models/db.config.js").dbConfig
+const token = require("./models/db.config.js").token
+
 const connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -27,6 +30,25 @@ const options = {
 const client = OPCUAClient.create(options)
 const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer"
 
+const {InfluxDB} = require('@influxdata/influxdb-client')
+
+// You can generate a Token from the "Tokens Tab" in the UI
+const org = 'NT'
+const bucket = 'test'
+const influxUrl = 'http://' + dbConfig.host.toString() + ':8086'
+
+const clientidb = new InfluxDB({url: influxUrl, token: token})
+
+const {Point} = require('@influxdata/influxdb-client')
+const writeApi = clientidb.getWriteApi(org, bucket)
+writeApi.useDefaultTags({host: 'host1'})
+
+async function writeToInflux(dataToInflux) {
+  const point = new Point('mem')
+  .floatField('used_percent', dataToInflux)
+writeApi.writePoint(point)
+
+  }
 seq_auth() // Sequelize authenticate to DB
 
 async function main() {
@@ -56,8 +78,8 @@ async function main() {
       const nodesToRead = {
         names: ['Counter', 'Static', 'FreeMem'],
         nodesToRead: [
-        { nodeId: "ns=1;i=1", attributeId: AttributeIds.Value },
-        { nodeId: "ns=1;i=2", attributeId: AttributeIds.Value },
+        // { nodeId: "ns=1;i=1", attributeId: AttributeIds.Value },
+        // { nodeId: "ns=1;i=2", attributeId: AttributeIds.Value },
         { nodeId: "ns=1;i=3", attributeId: AttributeIds.Value }
       ]
     }
@@ -129,8 +151,8 @@ async function main() {
     const itemsToMonitor = {
           names: ['Counter', 'Static', 'FreeMem'],
           itemsToMonitor: [
-          { nodeId: "ns=1;i=1", attributeId: AttributeIds.Value },
-          { nodeId: "ns=1;i=2", attributeId: AttributeIds.Value },
+          // { nodeId: "ns=1;i=1", attributeId: AttributeIds.Value },
+          // { nodeId: "ns=1;i=2", attributeId: AttributeIds.Value },
           { nodeId: "ns=1;i=3", attributeId: AttributeIds.Value }
         ]
       }
@@ -161,6 +183,8 @@ async function main() {
 
     updateTags(dataToDB)
     publish(changed)
+    writeToInflux(dataValue.value.value)
+    console.log(dataValue.value.value)
 
     })
     
@@ -169,7 +193,7 @@ async function main() {
     async function timeout(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    await timeout(2000)
+    await timeout(50000)
     
     console.log("now terminating subscription")
     await subscription.terminate()
@@ -189,6 +213,15 @@ async function main() {
       // disconnecting
       await client.disconnect()
       console.log("done !")
+      writeApi
+    .close()
+    .then(() => {
+        console.log('FINISHED')
+    })
+    .catch(e => {
+        console.error(e)
+        console.log('\\nFinished ERROR')
+    })
     } catch(err) {
       console.log("An error has occured : ",err)
       }

@@ -1,6 +1,5 @@
 const amqp = require('amqplib')
-const dbConfig = require('../models/db.config')
-const config = require('../models/db.config')
+const config = require('../models/db.config').dbConfig
 const serverIP = config.host
 
 function publish(dataToMqtt) {
