@@ -1,7 +1,7 @@
 const dbConfig = {
     host: '167.71.69.121',
     user: 'inkerinmaa',
-    password: 'Nyenskans_1611',
+    password: '',
     database: 'EVENTS',
     dialect: "mysql",
     pool: {
